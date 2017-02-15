@@ -279,6 +279,17 @@ The following theme would be incorrect because it has a gap. All series in your 
       domainMax: {
         type: Number,
         observer: '_drawChart'
+      },
+
+      showLegend: {
+        type: Object,
+        observer: '_drawChart',
+        value: true
+      },
+      showLabels: {
+        type: Object,
+        observer: '_drawChart',
+        value: false
       }
     },
 
@@ -586,7 +597,7 @@ The following theme would be incorrect because it has a gap. All series in your 
       var height = rectObject.height;
       var diff = Math.abs(this.barHeight - height);
       var offset = (diff / 2) - this._barPadding + height;
-      return Math.round(offset - offset * 0.10);
+      return Math.round(offset - offset * 0.25);
     },
 
     _drawBarLabel: function(x, y, labelText) {
@@ -602,6 +613,30 @@ The following theme would be incorrect because it has a gap. All series in your 
       }).catch(function(reason) {
         console.log('textSizePromise rejected: ', reason);
       });
+    },
+
+    _drawBarName: function(x, y, barName, bgColor) {
+      var color = this._getBarNameColor(bgColor);
+      var textSizePromise = this._calculateTextSize(barName);
+      var widthValue = this.widthValue;
+      var that = this;
+      textSizePromise.then(function(rectObject) {
+        var textWidth = rectObject.width;
+        var labelOffset = that._calculateLabelCenterOffset(rectObject);
+        var textNode = that.svg.append("text").attr("class", "bar-label").attr("fill", color).attr("x", x + 4).attr("y", y + labelOffset).attr("width", textWidth).text(barName);
+        that._addStyleScopeToElement(textNode);
+      }).catch(function(reason) {
+        console.log('textSizePromise rejected: ', reason);
+      });
+    },
+
+    _getBarNameColor: function(bgColor) {
+        var rg = /[0-9]{1,3}/g;
+        var rgbArray = bgColor.match(rg);
+        var r = rgbArray[0], g = rgbArray[1], b = rgbArray[2];
+
+        var a = 1 - (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        return a < 0.5 ? 'black' : 'white';
     },
 
     _sum: function(arr) {
@@ -636,6 +671,7 @@ The following theme would be incorrect because it has a gap. All series in your 
         i = 0,
         value,
         labelText,
+        barName,
         barWidth,
         y,
         x,
@@ -648,6 +684,7 @@ The following theme would be incorrect because it has a gap. All series in your 
         : this._getPercent;
       for (i; i < length; i++) {
         value = this.chartData[i];
+        barName = this.legendLabels[i] != undefined ? this.legendLabels[i] : "";
         if (this.barLabels == 'values') {
           textLabel = value;
         } else if (value == 0) {
@@ -662,6 +699,9 @@ The following theme would be incorrect because it has a gap. All series in your 
         this._drawBar(x, y, barWidth, this.barHeight, color);
         if (drawBars) {
           this._drawBarLabel(x, y, textLabel);
+        }
+        if (this.showLabels) {
+          this._drawBarName(x, y, barName, color);
         }
       };
     },
@@ -679,7 +719,7 @@ The following theme would be incorrect because it has a gap. All series in your 
     },
 
     _isThereEnoughSpaceForLegend: function() {
-      return this._minChartHeight(3) <= this.heightValue;
+      return this.showLegend && this._minChartHeight(3) <= this.heightValue;
     }
 
   });
