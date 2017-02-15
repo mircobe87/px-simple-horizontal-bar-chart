@@ -617,13 +617,14 @@ The following theme would be incorrect because it has a gap. All series in your 
 
     _drawBarName: function(x, y, barName, bgColor) {
       var color = this._getBarNameColor(bgColor);
+      var style = this._getBarNameDecoration(color);
       var textSizePromise = this._calculateTextSize(barName);
       var widthValue = this.widthValue;
       var that = this;
       textSizePromise.then(function(rectObject) {
         var textWidth = rectObject.width;
         var labelOffset = that._calculateLabelCenterOffset(rectObject);
-        var textNode = that.svg.append("text").attr("class", "bar-label").attr("fill", color).attr("x", x + 4).attr("y", y + labelOffset).attr("width", textWidth).text(barName);
+        var textNode = that.svg.append("text").attr("class", "bar-name").attr("fill", color).attr("style", style).attr("x", x + 4).attr("y", y + labelOffset).attr("width", textWidth).text(barName);
         that._addStyleScopeToElement(textNode);
       }).catch(function(reason) {
         console.log('textSizePromise rejected: ', reason);
@@ -637,6 +638,16 @@ The following theme would be incorrect because it has a gap. All series in your 
 
         var a = 1 - (0.299 * r + 0.587 * g + 0.114 * b) / 255;
         return a < 0.5 ? 'black' : 'white';
+    },
+
+    _getBarNameDecoration: function(nameColor) {
+      var decoration = "text-shadow: 0px 0px 4px "
+      if (nameColor == "white") {
+        decoration = decoration + "black";
+      } else {
+        decoration = decoration + "white";
+      }
+      return decoration + ";" ;
     },
 
     _sum: function(arr) {
