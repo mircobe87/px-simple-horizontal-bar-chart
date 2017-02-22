@@ -431,7 +431,7 @@ The following theme would be incorrect because it has a gap. All series in your 
       var availableHeight = drawLegend
         ? this.heightValue - this._getLegendHeight()
         : this.heightValue;
-      this.barHeight = Math.round(availableHeight / this.chartData.length) - this._barPadding;
+      this.barHeight = Math.floor(availableHeight / this.chartData.length) - this._barPadding;
       if (this.barHeight < this._minimumBarHeight) {
         console.error('The bar height is too low. In order to improve rendering of the chart, increase the height of the chart or remove data points being charted.');
       } else if (this.barHeight < 1) {
@@ -641,11 +641,11 @@ The following theme would be incorrect because it has a gap. All series in your 
     },
 
     _getBarNameDecoration: function(nameColor) {
-      var decoration = "text-shadow: 0px 0px 4px "
+      var decoration = "text-shadow: ";
       if (nameColor == "white") {
-        decoration = decoration + "black";
+        decoration = decoration + "0px 0px 4px black, 0px 0px 4px black";
       } else {
-        decoration = decoration + "white";
+        decoration = decoration + "0px 0px 4px white, 0px 0px 4px white";
       }
       return decoration + ";" ;
     },
